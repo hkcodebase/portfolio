@@ -1,193 +1,376 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hemant Kumar — Data & AI Engineer</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hemant Kumar — Data &amp; AI Engineer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#0E0F12;
+    --paper-2:#14161A;
+    --ink-100:#EDECE6;
+    --ink-300:#A7A69F;
+    --ink-500:#6E7178;
+    --line:#23262B;
+    --line-2:#2D3037;
+    --signal:#FF4D2E;
+    --signal-soft:rgba(255,77,46,0.14);
+    --grid:rgba(255,255,255,0.035);
+  }
 
-    <!-- Prevent theme flash -->
-    <script>
-      (function () {
-        var s = localStorage.getItem('hk-theme');
-        var p = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        if (s === 'dark' || (!s && p)) document.documentElement.classList.add('dark');
-      })();
-    </script>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="hk.css">
+  body{
+    background:var(--paper);
+    color:var(--ink-100);
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    position:relative;
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  body.is-loading{overflow:hidden;height:100vh;}
+  ::selection{background:var(--signal);color:#fff;}
+
+  .bg-grid{
+    position:fixed; inset:0; z-index:0;
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size:64px 64px;
+    mask-image:radial-gradient(circle at 50% 30%, #000 0%, #000 30%, transparent 70%);
+    -webkit-mask-image:radial-gradient(circle at 50% 30%, #000 0%, #000 30%, transparent 70%);
+    pointer-events:none;
+  }
+
+  /* ============ LOADER OVERLAY ============ */
+  .loader-overlay{
+    position:fixed; inset:0; z-index:50;
+    display:grid; place-items:center;
+    background:var(--paper);
+    transition:opacity .7s ease, visibility .7s;
+  }
+  .loader-overlay.done{opacity:0; visibility:hidden; pointer-events:none;}
+  .lo-glow{
+    position:absolute; left:50%; top:44%;
+    width:720px; height:720px; transform:translate(-50%,-50%);
+    background:radial-gradient(circle, var(--signal-soft) 0%, transparent 62%);
+    filter:blur(8px); pointer-events:none;
+  }
+  .lo-vignette{
+    position:absolute; inset:0;
+    background:radial-gradient(circle at 50% 42%, transparent 50%, rgba(0,0,0,0.55) 100%);
+    pointer-events:none;
+  }
+  .stage{position:relative; z-index:2; display:flex; flex-direction:column; align-items:center;}
+  .scene{width:300px; height:280px; perspective:1100px; perspective-origin:50% 44%; display:grid; place-items:center;}
+  .cube-wrap{transform-style:preserve-3d; animation:tumble 14s linear infinite; will-change:transform;}
+  @keyframes tumble{
+    0%   {transform:rotateX(-24deg) rotateY(0deg);}
+    100% {transform:rotateX(-24deg) rotateY(360deg);}
+  }
+  .cube{position:relative; width:150px; height:150px; transform-style:preserve-3d; margin:0 auto;}
+  .face{
+    position:absolute; width:150px; height:150px; left:50%; top:50%; margin:-75px 0 0 -75px;
+    border:1px solid var(--line-2);
+    background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0));
+    backdrop-filter:blur(1px);
+    display:grid; place-items:center;
+    box-shadow:inset 0 0 30px rgba(0,0,0,0.4);
+  }
+  .face::before{
+    content:""; position:absolute; inset:8px;
+    background:
+      linear-gradient(var(--signal),var(--signal)) 0 0/10px 1px no-repeat,
+      linear-gradient(var(--signal),var(--signal)) 0 0/1px 10px no-repeat,
+      linear-gradient(var(--signal),var(--signal)) 100% 0/10px 1px no-repeat,
+      linear-gradient(var(--signal),var(--signal)) 100% 0/1px 10px no-repeat,
+      linear-gradient(var(--signal),var(--signal)) 0 100%/10px 1px no-repeat,
+      linear-gradient(var(--signal),var(--signal)) 0 100%/1px 10px no-repeat,
+      linear-gradient(var(--signal),var(--signal)) 100% 100%/10px 1px no-repeat,
+      linear-gradient(var(--signal),var(--signal)) 100% 100%/1px 10px no-repeat;
+    opacity:0.55;
+  }
+  .glyph{font-family:"Space Grotesk",sans-serif; font-weight:700; font-size:44px; letter-spacing:-1px; color:var(--ink-100); text-shadow:0 2px 18px rgba(0,0,0,0.5);}
+  .glyph small{display:block; font-family:"IBM Plex Mono",monospace; font-weight:500; font-size:9px; letter-spacing:2px; color:var(--signal); text-align:center; margin-top:4px; text-shadow:none;}
+  .f-front {transform:translateZ(75px);}
+  .f-back  {transform:rotateY(180deg) translateZ(75px);}
+  .f-right {transform:rotateY(90deg) translateZ(75px);}
+  .f-left  {transform:rotateY(-90deg) translateZ(75px);}
+  .f-top   {transform:rotateX(90deg) translateZ(75px);}
+  .f-bottom{transform:rotateX(-90deg) translateZ(75px);}
+  .f-back,.f-bottom{opacity:0.4;}
+  .f-left,.f-right,.f-top{opacity:0.72;}
+  .floor{
+    position:absolute; left:50%; top:50%; width:150px;height:150px; margin:-75px 0 0 -75px;
+    transform:rotateX(90deg) translateZ(-96px);
+    background:radial-gradient(ellipse at center, rgba(255,77,46,0.20), transparent 68%);
+    filter:blur(6px);
+  }
+  .mark{margin-top:2px; text-align:center;}
+  .mark .name{font-family:"Space Grotesk",sans-serif; font-weight:600; font-size:22px; letter-spacing:-0.5px;}
+  .mark .name .dev{color:var(--signal);}
+  .mark .role{margin-top:8px; font-size:10.5px; letter-spacing:3px; text-transform:uppercase; color:var(--ink-500);}
+  .loader{margin-top:34px; width:320px; max-width:78vw;}
+  .loader .row{display:flex; justify-content:space-between; align-items:baseline; font-size:11px; letter-spacing:1px; color:var(--ink-300); margin-bottom:10px;}
+  .loader .row .status{color:var(--ink-500);}
+  .loader .row .pct{font-variant-numeric:tabular-nums; color:var(--ink-100); font-weight:600; font-size:13px;}
+  .track{position:relative; height:3px; background:var(--line); overflow:hidden;}
+  .barfill{position:absolute; left:0; top:0; bottom:0; width:0%; background:var(--signal); box-shadow:0 0 12px rgba(255,77,46,0.6); transition:width .25s cubic-bezier(.2,.7,.2,1);}
+  .ticks{margin-top:9px; display:flex; justify-content:space-between; font-size:9px; letter-spacing:1px; color:var(--ink-500);}
+  @media (prefers-reduced-motion: reduce){
+    .cube-wrap{animation:none; transform:rotateX(-24deg) rotateY(-32deg);}
+  }
+
+  /* ============ SITE ============ */
+  .site{
+    position:relative; z-index:2;
+    max-width:920px; margin:0 auto; padding:0 28px 110px;
+    opacity:0; transition:opacity .9s ease .15s;
+  }
+  body.loaded .site{opacity:1;}
+
+  .nav{
+    position:sticky; top:0; z-index:10;
+    display:flex; align-items:center; justify-content:space-between; height:64px;
+    backdrop-filter:blur(8px);
+    background:linear-gradient(var(--paper), rgba(14,15,18,0.55) 70%, transparent);
+    margin:0 -28px; padding:0 28px;
+  }
+  .nav .brand{font-family:"Space Grotesk",sans-serif; font-weight:700; font-size:14px; letter-spacing:.5px; color:var(--ink-100); border:1px solid var(--line-2); padding:6px 9px; text-decoration:none;}
+  .nav .links{display:flex; gap:26px; align-items:center;}
+  .nav .links a{color:var(--ink-300); text-decoration:none; font-size:12px; letter-spacing:1px; text-transform:uppercase; transition:color .2s;}
+  .nav .links a:hover{color:var(--signal);}
+
+  .hero{padding:80px 0 60px; border-bottom:1px solid var(--line);}
+  .hero .eyebrow{font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--signal); margin-bottom:22px;}
+  .hero h1{font-family:"Space Grotesk",sans-serif; font-weight:700; font-size:clamp(40px,8vw,74px); line-height:.98; letter-spacing:-2px; color:var(--ink-100); margin-bottom:16px;}
+  .hero .sub{font-family:"Space Grotesk",sans-serif; font-weight:500; font-size:clamp(17px,3vw,23px); color:var(--ink-300); letter-spacing:-.3px; margin-bottom:30px; display:flex; align-items:center; gap:14px;}
+  .hero .sub .ln{width:26px;height:2px;background:var(--signal);}
+  .hero p{font-size:14.5px; line-height:1.8; color:var(--ink-300); max-width:660px;}
+  .hero p strong{color:var(--ink-100); font-weight:600;}
+  .hero .building{margin-top:28px; font-size:13px; color:var(--ink-500); letter-spacing:.5px;}
+  .hero .building a{color:var(--signal); text-decoration:none; border-bottom:1px solid var(--signal-soft);}
+  .hero .building a:hover{border-bottom-color:var(--signal);}
+
+  .sec{padding:64px 0 0;}
+  .sec > h2{display:flex; align-items:center; gap:14px; font-family:"IBM Plex Mono",monospace; font-weight:500; font-size:12px; letter-spacing:3px; text-transform:uppercase; color:var(--ink-500); margin-bottom:28px;}
+  .sec > h2::before{content:""; width:8px;height:8px;background:var(--signal);}
+
+  .work a.item{
+    display:grid; grid-template-columns:46px 1fr auto; gap:20px; align-items:start;
+    text-decoration:none; color:inherit; padding:26px 4px; border-top:1px solid var(--line);
+    transition:background .2s, padding .2s;
+  }
+  .work a.item:last-child{border-bottom:1px solid var(--line);}
+  .work a.item:hover{background:rgba(255,255,255,0.02); padding-left:12px;}
+  .work .num{font-family:"IBM Plex Mono",monospace; font-size:13px; color:var(--signal); padding-top:5px;}
+  .work .title{font-family:"Space Grotesk",sans-serif; font-weight:600; font-size:21px; letter-spacing:-.4px; color:var(--ink-100); margin-bottom:8px;}
+  .work .desc{font-size:13.5px; line-height:1.6; color:var(--ink-300); max-width:560px;}
+  .work .stack{display:flex; flex-wrap:wrap; gap:7px; margin-top:14px;}
+  .work .stack span{font-size:10.5px; letter-spacing:.5px; color:var(--ink-300); border:1px solid var(--line-2); padding:3px 8px;}
+  .work .meta{display:flex; align-items:center; gap:10px; font-size:12px; color:var(--ink-500); padding-top:5px; white-space:nowrap;}
+  .work .meta .arrow{color:var(--ink-100); transition:transform .2s, color .2s;}
+  .work a.item:hover .meta .arrow{color:var(--signal); transform:translate(2px,-2px);}
+
+  .exp-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:1px; background:var(--line); border:1px solid var(--line);}
+  .exp-cell{background:var(--paper); padding:26px 24px;}
+  .exp-cell h3{font-family:"Space Grotesk",sans-serif; font-weight:600; font-size:16px; color:var(--ink-100); margin-bottom:16px; letter-spacing:-.2px; display:flex; align-items:center;}
+  .exp-cell h3 .dot{width:6px;height:6px;background:var(--signal); margin-right:10px;}
+  .exp-cell ul{list-style:none; display:flex; flex-wrap:wrap; gap:7px;}
+  .exp-cell li{font-size:11.5px; letter-spacing:.3px; color:var(--ink-300); background:rgba(255,255,255,0.03); border:1px solid var(--line-2); padding:4px 9px;}
+
+  .connect p{font-size:15px; line-height:1.75; color:var(--ink-300); max-width:600px; margin-bottom:28px;}
+  .connect .social{display:flex; gap:12px; flex-wrap:wrap;}
+  .connect .social a{
+    display:flex; align-items:center; gap:9px; text-decoration:none;
+    color:var(--ink-100); font-size:13px; letter-spacing:.5px;
+    border:1px solid var(--line-2); padding:11px 16px; transition:border-color .2s, color .2s;
+  }
+  .connect .social a:hover{border-color:var(--signal); color:var(--signal);}
+  .connect .social a .ar{color:var(--ink-500);}
+
+  .foot{margin-top:72px; padding-top:22px; border-top:1px solid var(--line); display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; font-size:11px; letter-spacing:1px; color:var(--ink-500); text-transform:uppercase;}
+
+  @media (max-width:640px){
+    .exp-grid{grid-template-columns:1fr;}
+    .nav .links a:not(:last-child){display:none;}
+    .work a.item{grid-template-columns:30px 1fr;}
+    .work .meta{grid-column:2; padding-top:4px;}
+  }
+</style>
 </head>
-<body>
+<body class="is-loading">
+  <div class="bg-grid"></div>
 
-<!-- Nav -->
-<nav class="nav">
-    <a href="#" class="nav-logo">HK</a>
-    <div class="nav-right">
-        <a href="#work"      class="nav-link">Work</a>
-        <a href="#expertise" class="nav-link">Expertise</a>
-        <a href="#connect"   class="nav-link">Connect</a>
-        <button id="theme-toggle" class="theme-btn" aria-label="Toggle theme" title="Toggle light / dark">◐</button>
+  <!-- ============ LOADER OVERLAY ============ -->
+  <div class="loader-overlay" id="overlay">
+    <div class="lo-glow"></div>
+    <div class="stage">
+      <div class="scene">
+        <div class="cube-wrap">
+          <div class="cube">
+            <div class="floor"></div>
+            <div class="face f-front"><div class="glyph">HK<small>SYSTEMS</small></div></div>
+            <div class="face f-back"><div class="glyph">HK<small>SYSTEMS</small></div></div>
+            <div class="face f-right"><div class="glyph">{ }<small>DATA</small></div></div>
+            <div class="face f-left"><div class="glyph">&lt;/&gt;<small>FULL-STACK</small></div></div>
+            <div class="face f-top"><div class="glyph">AI<small>AGENTS</small></div></div>
+            <div class="face f-bottom"><div class="glyph">⌘<small>CLOUD</small></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="mark">
+        <div class="name">hemantkumar<span class="dev">.dev</span></div>
+        <div class="role">Data · AI · Real-Time Systems</div>
+      </div>
+      <div class="loader">
+        <div class="row">
+          <span class="status" id="status">Initializing runtime</span>
+          <span class="pct" id="pct">00%</span>
+        </div>
+        <div class="track"><div class="barfill" id="bar"></div></div>
+        <div class="ticks"><span>BOOT</span><span>COMPILE</span><span>HYDRATE</span><span>READY</span></div>
+      </div>
     </div>
-</nav>
+    <div class="lo-vignette"></div>
+  </div>
 
-<main>
+  <!-- ============ SITE ============ -->
+  <main class="site">
+    <nav class="nav">
+      <a class="brand" href="#top">HK</a>
+      <div class="links">
+        <a href="#work">Work</a>
+        <a href="#expertise">Expertise</a>
+        <a href="#connect">Connect</a>
+      </div>
+    </nav>
 
-    <!-- Hero -->
-    <section class="hero">
-        <p class="hero-name">Hemant Kumar</p>
-        <p class="hero-role">Data &amp; AI Engineer</p>
-        <p class="hero-bio">
-            I build large-scale production systems, AI agents, and real-time event-driven pipelines —
-            end to end, from React frontends to distributed backends.
-            15+ years across full-stack and distributed systems engineering, now applied to
-            LangGraph, AWS Bedrock, Kafka, and modern data stacks.
-            Software Engineer III @ JPMorgan Chase.
-        </p>
-        <p class="hero-now">
-            Currently building → <a href="https://snarky-squirrel.hemantkumar.dev" target="_blank">snarky-squirrel.hemantkumar.dev</a>
-        </p>
-    </section>
+    <header class="hero" id="top">
+      <div class="eyebrow">Data &amp; AI Engineer</div>
+      <h1>Hemant Kumar</h1>
+      <div class="sub"><span class="ln"></span> I build production systems, AI agents &amp; real-time pipelines.</div>
+      <p>I build large-scale production systems, AI agents, and real-time event-driven pipelines — end to end, from React frontends to distributed backends. <strong>15+ years</strong> across full-stack and distributed systems engineering, now applied to LangGraph, AWS Bedrock, Kafka, and modern data stacks. <strong>Software Engineer III @ JPMorgan Chase</strong>.</p>
+      <div class="building">Currently building → <a href="https://snarky-squirrel.hemantkumar.dev" target="_blank" rel="noopener">snarky-squirrel.hemantkumar.dev</a></div>
+    </header>
 
-    <!-- Work -->
-    <section id="work" class="work">
-        <p class="label">Work</p>
-        <div class="box">
-            <a href="https://snarky-squirrel.hemantkumar.dev" target="_blank" class="project">
-                <span class="project-num">01</span>
-                <div class="project-body">
-                    <p class="project-title">Snarky Squirrel — AI PR Reviewer</p>
-                    <p class="project-tags">LangGraph · AWS Bedrock · Multi-agent · Cognito · Python</p>
-                    <p class="project-desc">Multi-agent code reviewer with Cognito auth, deployed on EC2 with HTTPS.</p>
-                </div>
-                <div class="project-right">
-                    <span class="project-year">2026</span>
-                    <span class="project-arrow">↗</span>
-                </div>
-            </a>
+    <section class="sec work" id="work">
+      <h2>Work</h2>
 
-            <a href="https://links.hemantkumar.dev" target="_blank" class="project">
-                <span class="project-num">02</span>
-                <div class="project-body">
-                    <p class="project-title">Serverless TinyURL</p>
-                    <p class="project-tags">Lambda · DynamoDB · API Gateway · Terraform</p>
-                    <p class="project-desc">Serverless URL shortener on AWS, fully managed via IaC.</p>
-                </div>
-                <div class="project-right">
-                    <span class="project-year">2025</span>
-                    <span class="project-arrow">↗</span>
-                </div>
-            </a>
-
-            <a href="https://hemantkumar.dev" target="_blank" class="project">
-                <span class="project-num">03</span>
-                <div class="project-body">
-                    <p class="project-title">Portfolio — hemantkumar.dev</p>
-                    <p class="project-tags">S3 / CloudFront · Terraform · GitHub Actions</p>
-                    <p class="project-desc">Cloud-native portfolio on AWS, auto-deployed via GitHub Actions.</p>
-                </div>
-                <div class="project-right">
-                    <span class="project-year">2024</span>
-                    <span class="project-arrow">↗</span>
-                </div>
-            </a>
+      <a class="item" href="https://snarky-squirrel.hemantkumar.dev" target="_blank" rel="noopener">
+        <div class="num">01</div>
+        <div class="body">
+          <div class="title">Snarky Squirrel — AI PR Reviewer</div>
+          <div class="desc">Multi-agent code reviewer with Cognito auth, deployed on EC2 with HTTPS.</div>
+          <div class="stack"><span>LangGraph</span><span>AWS Bedrock</span><span>Multi-agent</span><span>Cognito</span><span>Python</span></div>
         </div>
-    </section>
+        <div class="meta"><span>2026</span><span class="arrow">↗</span></div>
+      </a>
 
-    <!-- Expertise -->
-    <section id="expertise" class="expertise">
-        <p class="label">Expertise</p>
-        <div class="box">
-            <div class="skills-grid">
-                <div class="skill-group">
-                    <p class="skill-group-name">LLMs &amp; Generative AI</p>
-                    <ul class="skill-list">
-                        <li>LangGraph</li>
-                        <li>LangChain</li>
-                        <li>AWS Bedrock</li>
-                        <li>Prompt Engineering</li>
-                        <li>Multi-agent Systems</li>
-                        <li>RAG</li>
-                        <li>Claude API</li>
-                    </ul>
-                </div>
-
-                <div class="skill-group">
-                    <p class="skill-group-name">Data &amp; Event-Driven Systems</p>
-                    <ul class="skill-list">
-                        <li>Apache Spark</li>
-                        <li>Kafka</li>
-                        <li>Real-time Pipelines</li>
-                        <li>Event-driven Architecture</li>
-                        <li>Airflow</li>
-                        <li>dbt</li>
-                        <li>ETL / ELT</li>
-                        <li>Data Modeling</li>
-                        <li>SQL / NoSQL</li>
-                    </ul>
-                </div>
-
-                <div class="skill-group">
-                    <p class="skill-group-name">Cloud &amp; Infrastructure</p>
-                    <ul class="skill-list">
-                        <li>AWS</li>
-                        <li>Terraform</li>
-                        <li>Docker / K8s</li>
-                        <li>ECS / EKS</li>
-                        <li>SageMaker</li>
-                        <li>CI/CD</li>
-                        <li>GitHub Actions</li>
-                    </ul>
-                </div>
-
-                <div class="skill-group">
-                    <p class="skill-group-name">Software Engineering</p>
-                    <ul class="skill-list">
-                        <li>Java 17+ / Spring Boot</li>
-                        <li>Python</li>
-                        <li>React (full-stack)</li>
-                        <li>Microservices</li>
-                        <li>Large-scale Systems</li>
-                        <li>REST APIs</li>
-                        <li>System Design</li>
-                    </ul>
-                </div>
-            </div>
+      <a class="item" href="https://links.hemantkumar.dev" target="_blank" rel="noopener">
+        <div class="num">02</div>
+        <div class="body">
+          <div class="title">Serverless TinyURL</div>
+          <div class="desc">Serverless URL shortener on AWS, fully managed via IaC.</div>
+          <div class="stack"><span>Lambda</span><span>DynamoDB</span><span>API Gateway</span><span>Terraform</span></div>
         </div>
-    </section>
+        <div class="meta"><span>2025</span><span class="arrow">↗</span></div>
+      </a>
 
-    <!-- Connect -->
-    <section id="connect" class="connect">
-        <p class="label">Connect</p>
-        <div class="box">
-            <div class="connect-inner">
-                <p class="connect-bio">
-                    Open to discussing AI systems, large-scale production engineering, real-time data platforms, or full-stack architecture.
-                </p>
-                <div class="connect-links">
-                    <a href="https://www.linkedin.com/in/hemantk01/" target="_blank" class="connect-link">LinkedIn</a>
-                    <a href="https://github.com/hkcodebase"           target="_blank" class="connect-link">GitHub</a>
-                    <a href="https://hkcodeblogs.medium.com"          target="_blank" class="connect-link">Medium</a>
-                </div>
-            </div>
+      <a class="item" href="https://hemantkumar.dev" target="_blank" rel="noopener">
+        <div class="num">03</div>
+        <div class="body">
+          <div class="title">Portfolio — hemantkumar.dev</div>
+          <div class="desc">Cloud-native portfolio on AWS, auto-deployed via GitHub Actions.</div>
+          <div class="stack"><span>S3 / CloudFront</span><span>Terraform</span><span>GitHub Actions</span></div>
         </div>
+        <div class="meta"><span>2024</span><span class="arrow">↗</span></div>
+      </a>
     </section>
 
-</main>
+    <section class="sec" id="expertise">
+      <h2>Expertise</h2>
+      <div class="exp-grid">
+        <div class="exp-cell">
+          <h3><span class="dot"></span>LLMs &amp; Generative AI</h3>
+          <ul><li>LangGraph</li><li>LangChain</li><li>AWS Bedrock</li><li>Prompt Engineering</li><li>Multi-agent Systems</li><li>RAG</li><li>Claude API</li></ul>
+        </div>
+        <div class="exp-cell">
+          <h3><span class="dot"></span>Data &amp; Event-Driven Systems</h3>
+          <ul><li>Apache Spark</li><li>Kafka</li><li>Real-time Pipelines</li><li>Event-driven Architecture</li><li>Airflow</li><li>dbt</li><li>ETL / ELT</li><li>Data Modeling</li><li>SQL / NoSQL</li></ul>
+        </div>
+        <div class="exp-cell">
+          <h3><span class="dot"></span>Cloud &amp; Infrastructure</h3>
+          <ul><li>AWS</li><li>Terraform</li><li>Docker / K8s</li><li>ECS / EKS</li><li>SageMaker</li><li>CI/CD</li><li>GitHub Actions</li></ul>
+        </div>
+        <div class="exp-cell">
+          <h3><span class="dot"></span>Software Engineering</h3>
+          <ul><li>Java 17+ / Spring Boot</li><li>Python</li><li>React (full-stack)</li><li>Microservices</li><li>Large-scale Systems</li><li>REST APIs</li><li>System Design</li></ul>
+        </div>
+      </div>
+    </section>
 
-<footer>
-    <span>© 2026 Hemant Kumar</span>
-    <span>Served via Github Pages</span>
-</footer>
+    <section class="sec connect" id="connect">
+      <h2>Connect</h2>
+      <p>Open to discussing AI systems, large-scale production engineering, real-time data platforms, or full-stack architecture.</p>
+      <div class="social">
+        <a href="https://www.linkedin.com/in/hemantk01/" target="_blank" rel="noopener">LinkedIn <span class="ar">↗</span></a>
+        <a href="https://github.com/hkcodebase" target="_blank" rel="noopener">GitHub <span class="ar">↗</span></a>
+        <a href="https://hkcodeblogs.medium.com" target="_blank" rel="noopener">Medium <span class="ar">↗</span></a>
+      </div>
+      <div class="foot">
+        <span>© 2026 Hemant Kumar</span>
+        <span>Served via GitHub Pages</span>
+      </div>
+    </section>
+  </main>
 
 <script>
-    document.getElementById('theme-toggle').addEventListener('click', function () {
-        var isDark = document.documentElement.classList.toggle('dark');
-        localStorage.setItem('hk-theme', isDark ? 'dark' : 'light');
-    });
+  const stages = [
+    [0,  "Initializing runtime"],
+    [22, "Loading modules"],
+    [46, "Compiling pipelines"],
+    [70, "Hydrating interface"],
+    [90, "Finalizing"],
+    [100,"Ready"]
+  ];
+  const barEl = document.getElementById('bar');
+  const pctEl = document.getElementById('pct');
+  const statusEl = document.getElementById('status');
+  const overlay = document.getElementById('overlay');
+
+  let p = 0;
+  function tick(){
+    const remaining = 100 - p;
+    const step = Math.max(0.5, remaining * 0.04) + Math.random()*1.4;
+    p = Math.min(100, p + step);
+    barEl.style.width = p + '%';
+    pctEl.textContent = String(Math.floor(p)).padStart(2,'0') + '%';
+    let label = stages[0][1];
+    for(const [thr,txt] of stages){ if(p >= thr) label = txt; }
+    statusEl.textContent = label;
+
+    if(p < 100){
+      setTimeout(tick, 80 + Math.random()*130);
+    } else {
+      statusEl.textContent = "Ready";
+      setTimeout(reveal, 520);
+    }
+  }
+  function reveal(){
+    overlay.classList.add('done');
+    document.body.classList.remove('is-loading');
+    document.body.classList.add('loaded');
+  }
+  setTimeout(tick, 400);
+
+  // Skip loader on click / keypress
+  window.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key==='Escape'){ p=100; reveal(); }});
+  overlay.addEventListener('click', ()=>{ if(p>4){ p=100; reveal(); }});
 </script>
-<script data-goatcounter="https://hemantkumar.goatcounter.com/count"
-        async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
